@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ============ USERS & AUTH ============
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          String    @default("CONTRIBUTOR") // ADMIN, PROJECT_MANAGER, CONTRIBUTOR
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  ownedProjects     Project[]       @relation("ProjectOwner")
+  contributions     ProjectMember[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]      @relation("AuditUser")
+  toolVersions      ToolVersion[]
+  comments          Comment[]
+}
+
+// ============ PROJECTS ============
+
+model Project {
+  id            String    @id @default(uuid())
+  name          String
+  code          String    @unique
+  description   String?
+  status        String    @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED, ARCHIVED
+  currentPhase  String    @default("DEFINE") // DEFINE, MEASURE, ANALYZE, IMPROVE, CONTROL
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  ownerId       String
+  owner         User          @relation("ProjectOwner", fields: [ownerId], references: [id])
+  members       ProjectMember[]
+  tools         ToolInstance[]
+  auditLogs     AuditLog[]
+  comments      Comment[]
+}
+
+// ============ PROJECT MEMBERS ============
+
+model ProjectMember {
+  id        String   @id @default(uuid())
+  role      String   @default("VIEWER") // EDITOR, VIEWER
+  joinedAt  DateTime @default(now())
+
+  projectId String
+  userId    String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+// ============ TOOL DEFINITIONS ============
+
+model ToolDefinition {
+  id            String  @id @default(uuid())
+  code          String  @unique
+  name          String
+  nameFr        String
+  description   String
+  descriptionFr String
+  phase         String  // DEFINE, MEASURE, ANALYZE, IMPROVE, CONTROL
+  priority      String  // OBLIGATORY, RECOMMENDED, SITUATIONAL
+  templateType  String  // MATRIX, FORM, DIAGRAM, CHART, CALCULATION, CHECKLIST, RICH_TEXT
+  schema        String  @default("{}") // JSON stocké comme string
+  helpContent   String? // Guide contextuel en markdown
+  iconName      String? // Nom de l'icône
+  order         Int     @default(0)
+
+  instances     ToolInstance[]
+}
+
+// ============ TOOL INSTANCES ============
+
+model ToolInstance {
+  id               String    @id @default(uuid())
+  phase            String    // DEFINE, MEASURE, ANALYZE, IMPROVE, CONTROL
+  status           String    @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  data             String    @default("{}") // JSON stocké comme string
+  version          Int       @default(1)
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  projectId        String
+  toolDefinitionId String
+  project          Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  toolDefinition   ToolDefinition @relation(fields: [toolDefinitionId], references: [id])
+  versions         ToolVersion[]
+  comments         Comment[]
+
+  @@unique([projectId, toolDefinitionId, phase])
+}
+
+// ============ VERSION HISTORY ============
+
+model ToolVersion {
+  id              String   @id @default(uuid())
+  version         Int
+  data            String   // JSON stocké comme string
+  changesSummary  String?
+  createdAt       DateTime @default(now())
+
+  toolInstanceId  String
+  createdById     String
+  toolInstance    ToolInstance @relation(fields: [toolInstanceId], references: [id], onDelete: Cascade)
+  createdBy       User         @relation(fields: [createdById], references: [id])
+
+  @@unique([toolInstanceId, version])
+}
+
+// ============ COMMENTS ============
+
+model Comment {
+  id             String   @id @default(uuid())
+  content        String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userId         String
+  projectId      String
+  toolInstanceId String?
+  user           User          @relation(fields: [userId], references: [id])
+  project        Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  toolInstance   ToolInstance? @relation(fields: [toolInstanceId], references: [id], onDelete: Cascade)
+}
+
+// ============ AUDIT LOG ============
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String   // CREATE, UPDATE, DELETE, VIEW
+  entityType String   // Project, ToolInstance, User, etc.
+  entityId   String
+  changes    String?  // JSON stocké comme string
+  metadata   String?  // JSON stocké comme string
+  createdAt  DateTime @default(now())
+
+  userId     String
+  projectId  String?
+  user       User     @relation("AuditUser", fields: [userId], references: [id])
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// ============ NOTIFICATIONS ============
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  title     String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}

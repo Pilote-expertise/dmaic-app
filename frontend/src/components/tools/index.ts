@@ -1,0 +1,13 @@
+export { default as DefaultTemplate } from './DefaultTemplate';
+export { default as SIPOCTemplate } from './SIPOCTemplate';
+export { default as CharteProjetTemplate } from './CharteProjetTemplate';
+export { default as VOCTemplate } from './VOCTemplate';
+export { default as CTQTemplate } from './CTQTemplate';
+export { default as IshikawaTemplate } from './IshikawaTemplate';
+export { default as AMDECTemplate } from './AMDECTemplate';
+export { default as ParetoTemplate } from './ParetoTemplate';
+export { default as PlanCollecteTemplate } from './PlanCollecteTemplate';
+export { default as ControlPlanTemplate } from './ControlPlanTemplate';
+export { default as FiveWhysTemplate } from './FiveWhysTemplate';
+export { default as ChecklistTemplate } from './ChecklistTemplate';
+export { default as ActionPlanTemplate } from './ActionPlanTemplate';
