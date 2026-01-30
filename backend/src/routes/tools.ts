@@ -6,6 +6,49 @@ import { Server } from 'socket.io';
 
 const router = Router();
 
+// Helper function to auto-update project status based on tools
+async function updateProjectStatusFromTools(projectId: string) {
+  // Get all tools for this project
+  const tools = await prisma.toolInstance.findMany({
+    where: { projectId }
+  });
+
+  if (tools.length === 0) return;
+
+  // Get current project
+  const project = await prisma.project.findUnique({
+    where: { id: projectId }
+  });
+
+  if (!project) return;
+
+  // Count tool statuses
+  const completed = tools.filter(t => t.status === 'COMPLETED').length;
+  const inProgress = tools.filter(t => t.status === 'IN_PROGRESS').length;
+  const total = tools.length;
+
+  let newStatus = project.status;
+
+  // Determine new project status
+  if (completed === total && total > 0) {
+    // All tools completed → project COMPLETED
+    newStatus = 'COMPLETED';
+  } else if (inProgress > 0 || completed > 0) {
+    // At least one tool in progress or completed → project IN_PROGRESS
+    if (project.status === 'DRAFT') {
+      newStatus = 'IN_PROGRESS';
+    }
+  }
+
+  // Update project status if changed
+  if (newStatus !== project.status) {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: { status: newStatus }
+    });
+  }
+}
+
 // GET /api/tools/definitions - Get all tool definitions
 router.get('/definitions', async (req, res) => {
   try {
@@ -218,6 +261,9 @@ router.put('/project/:projectId/tool/:toolId', async (req: AuthRequest, res) => 
       updatedBy: userId
     });
 
+    // Auto-update project status based on tools
+    await updateProjectStatusFromTools(projectId);
+
     res.json(updated);
   } catch (error) {
     console.error('Update tool error:', error);
@@ -358,6 +404,9 @@ router.post('/instance', async (req: AuthRequest, res) => {
       toolDefinitionId
     });
 
+    // Auto-update project status based on tools
+    await updateProjectStatusFromTools(projectId);
+
     res.status(201).json(tool);
   } catch (error) {
     console.error('Create tool instance error:', error);
@@ -426,6 +475,9 @@ router.put('/instance/:toolId', async (req: AuthRequest, res) => {
       status: updated.status,
       updatedBy: userId
     });
+
+    // Auto-update project status based on tools
+    await updateProjectStatusFromTools(current.projectId);
 
     res.json(updated);
   } catch (error) {
