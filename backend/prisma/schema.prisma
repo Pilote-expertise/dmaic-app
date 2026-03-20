@@ -21,12 +21,49 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  ownedProjects     Project[]       @relation("ProjectOwner")
-  contributions     ProjectMember[]
-  notifications     Notification[]
-  auditLogs         AuditLog[]      @relation("AuditUser")
-  toolVersions      ToolVersion[]
-  comments          Comment[]
+  ownedProjects       Project[]             @relation("ProjectOwner")
+  contributions       ProjectMember[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]            @relation("AuditUser")
+  toolVersions        ToolVersion[]
+  comments            Comment[]
+  passwordResetTokens PasswordResetToken[]
+  reviewedRequests    AccessRequest[]       @relation("ReviewedRequests")
+}
+
+// ============ ACCESS REQUESTS ============
+
+model AccessRequest {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  firstName    String
+  lastName     String
+  password     String    // Hashé
+  status       String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reason       String?   // Raison du rejet (optionnel)
+  createdAt    DateTime  @default(now())
+  reviewedAt   DateTime?
+  reviewedById String?
+  reviewedBy   User?     @relation("ReviewedRequests", fields: [reviewedById], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ============ PASSWORD RESET TOKENS ============
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
 }
 
 // ============ PROJECTS ============

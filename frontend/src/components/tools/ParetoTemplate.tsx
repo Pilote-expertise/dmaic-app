@@ -177,101 +177,134 @@ export default function ParetoTemplate({
       {paretoAnalysis.sorted.length > 0 && (
         <div className="card p-6">
           <h3 className="font-semibold mb-4">Visualisation Pareto</h3>
-          <div className="relative">
-            {/* Y-axis label */}
-            <div className="absolute -left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-gray-500">
-              Valeur
+
+          {/* Chart container */}
+          <div className="relative" style={{ height: '350px', paddingBottom: '40px' }}>
+            {/* Y-axis labels (left - values) */}
+            <div className="absolute left-0 top-0 w-12 flex flex-col justify-between text-xs text-gray-500 text-right pr-2" style={{ height: '280px' }}>
+              <span>{paretoAnalysis.maxValue}</span>
+              <span>{Math.round(paretoAnalysis.maxValue * 0.5)}</span>
+              <span>0</span>
             </div>
 
-            {/* Chart container */}
-            <div className="ml-8 mr-12">
-              {/* Bars and cumulative line */}
-              <div className="flex items-end gap-2 h-64 border-b border-l border-gray-200 relative">
-                {/* 80% line */}
-                <div
-                  className="absolute left-0 right-0 border-t-2 border-dashed border-control z-10"
-                  style={{ bottom: '80%' }}
-                >
-                  <span className="absolute -right-12 -top-2 text-xs text-control font-medium">
-                    80%
-                  </span>
-                </div>
+            {/* Y-axis labels (right - cumulative %) */}
+            <div className="absolute right-0 top-0 w-10 flex flex-col justify-between text-xs text-rose-500 font-medium pl-1" style={{ height: '280px' }}>
+              <span>100%</span>
+              <span>50%</span>
+              <span>0%</span>
+            </div>
 
+            {/* Chart area */}
+            <div className="absolute left-14 right-12 top-0 bg-gradient-to-b from-gray-50 to-white border border-gray-200 rounded-lg overflow-hidden" style={{ height: '280px' }}>
+              {/* Grid lines */}
+              <div className="absolute left-0 right-0 border-t border-gray-100" style={{ top: '50%' }} />
+
+              {/* 80% threshold line */}
+              <div
+                className="absolute left-0 right-0 border-t-2 border-dashed border-rose-300 z-20"
+                style={{ top: '20%' }}
+              >
+                <span className="absolute -right-1 -top-5 text-xs text-rose-500 font-bold bg-white px-1 rounded shadow-sm">80%</span>
+              </div>
+
+              {/* Main chart content - using flex for even distribution */}
+              <div className="absolute inset-0 flex items-end px-6">
                 {paretoAnalysis.sorted.map((item, index) => {
                   const heightPercent = (item.value / paretoAnalysis.maxValue) * 100;
-                  const cumulativePercent = item.cumulative;
+                  const isVital = item.cumulative <= 80;
 
                   return (
                     <div
                       key={item.id}
-                      className="flex-1 flex flex-col items-center relative group"
+                      className="flex-1 relative group h-full flex items-end justify-center"
                     >
-                      {/* Cumulative line point */}
-                      <div
-                        className="absolute w-3 h-3 bg-control rounded-full border-2 border-white shadow z-20"
-                        style={{
-                          bottom: `${cumulativePercent}%`,
-                          transform: 'translateY(50%)',
-                        }}
-                      />
-
-                      {/* Cumulative line */}
-                      {index > 0 && (
-                        <svg
-                          className="absolute w-full h-full pointer-events-none"
-                          style={{ bottom: 0, left: '-50%' }}
-                        >
-                          <line
-                            x1="50%"
-                            y1={`${100 - paretoAnalysis.sorted[index - 1].cumulative}%`}
-                            x2="150%"
-                            y2={`${100 - cumulativePercent}%`}
-                            stroke="#E11D48"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      )}
-
                       {/* Bar */}
                       <div
                         className={cn(
-                          'w-full rounded-t transition-all',
-                          barColors[index % barColors.length],
-                          'group-hover:opacity-80'
+                          'rounded-t transition-all duration-300 shadow-sm cursor-pointer',
+                          isVital ? barColors[index % barColors.length] : 'bg-gray-300',
+                          'hover:opacity-80'
                         )}
-                        style={{ height: `${heightPercent}%` }}
+                        style={{
+                          height: `${heightPercent}%`,
+                          width: 'clamp(12px, 60%, 32px)'
+                        }}
+                      />
+
+                      {/* Cumulative point - positioned at center of flex item */}
+                      <div
+                        className="absolute left-1/2 transform -translate-x-1/2 w-3.5 h-3.5 bg-rose-500 border-2 border-white rounded-full shadow-md z-30"
+                        style={{ top: `${100 - item.cumulative}%` }}
                       />
 
                       {/* Tooltip */}
-                      <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-30">
-                        {item.category}: {item.value} ({item.percentage.toFixed(1)}%)
-                        <br />
-                        Cumulé: {cumulativePercent.toFixed(1)}%
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 hidden group-hover:block bg-gray-800 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-50 shadow-xl">
+                        <div className="font-semibold text-sm">{item.category}</div>
+                        <div className="mt-1 space-y-0.5">
+                          <div>Valeur: <span className="font-bold text-blue-300">{item.value}</span> ({item.percentage.toFixed(1)}%)</div>
+                          <div>Cumulé: <span className="font-bold text-rose-300">{item.cumulative.toFixed(1)}%</span></div>
+                        </div>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full">
+                          <div className="border-6 border-transparent border-t-gray-800" style={{ borderWidth: '6px' }} />
+                        </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* X-axis labels */}
-              <div className="flex gap-2 mt-2">
-                {paretoAnalysis.sorted.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex-1 text-xs text-center text-gray-600 truncate"
-                    title={item.category}
-                  >
-                    {item.category}
-                  </div>
-                ))}
-              </div>
+              {/* Cumulative line SVG overlay */}
+              <svg
+                className="absolute pointer-events-none z-10"
+                style={{ left: '24px', right: '24px', top: 0, bottom: 0, width: 'calc(100% - 48px)', height: '100%' }}
+                viewBox="0 0 100 100"
+                preserveAspectRatio="none"
+              >
+                <polyline
+                  fill="none"
+                  stroke="#E11D48"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  points={paretoAnalysis.sorted.map((item, index) => {
+                    const n = paretoAnalysis.sorted.length;
+                    const segmentWidth = 100 / n;
+                    const x = segmentWidth * index + segmentWidth / 2;
+                    const y = 100 - item.cumulative;
+                    return `${x},${y}`;
+                  }).join(' ')}
+                />
+              </svg>
             </div>
 
-            {/* Right Y-axis for cumulative */}
-            <div className="absolute right-0 top-0 bottom-8 flex flex-col justify-between text-xs text-gray-400">
-              <span>100%</span>
-              <span>50%</span>
-              <span>0%</span>
+            {/* X-axis labels */}
+            <div className="absolute left-14 right-12 flex px-6" style={{ top: '290px' }}>
+              {paretoAnalysis.sorted.map((item) => (
+                <div
+                  key={`label-${item.id}`}
+                  className="flex-1 text-xs text-center text-gray-600 font-medium truncate px-1"
+                  title={item.category}
+                >
+                  {item.category}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Summary stats */}
+          <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-define">{paretoAnalysis.sorted.length}</div>
+              <div className="text-xs text-gray-500">Catégories</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-analyze">{paretoAnalysis.total}</div>
+              <div className="text-xs text-gray-500">Total</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-control">{paretoAnalysis.vital.length}</div>
+              <div className="text-xs text-gray-500">Causes vitales (80%)</div>
             </div>
           </div>
 
@@ -279,14 +312,18 @@ export default function ParetoTemplate({
           <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-100">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-define rounded" />
-              <span className="text-sm text-gray-600">Valeur par catégorie</span>
+              <span className="text-sm text-gray-600">Causes vitales</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-1 bg-control rounded" />
+              <div className="w-4 h-4 bg-gray-300 rounded" />
+              <span className="text-sm text-gray-600">Causes triviales</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-control rounded-full" />
               <span className="text-sm text-gray-600">Cumul (%)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 border-t-2 border-dashed border-control" />
+              <div className="w-6 h-0.5 border-t-2 border-dashed border-control" />
               <span className="text-sm text-gray-600">Seuil 80%</span>
             </div>
           </div>

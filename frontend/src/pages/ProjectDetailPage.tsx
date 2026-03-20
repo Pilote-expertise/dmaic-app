@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ChevronRight,
   Users,
@@ -15,8 +15,12 @@ import {
   ArrowLeft,
   Download,
   Share2,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react';
 import { projectsApi, toolsApi } from '@/services/api';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/utils/cn';
 import type { ToolDefinition } from '@/types';
@@ -80,9 +84,13 @@ type DmaicPhase = keyof typeof phaseConfig;
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(['DEFINE']));
   const [selectedPhase, setSelectedPhase] = useState<DmaicPhase>('DEFINE');
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const { data: project, isLoading: projectLoading } = useQuery({
     queryKey: ['project', projectId],
@@ -100,6 +108,56 @@ export default function ProjectDetailPage() {
     queryFn: () => toolsApi.getProjectTools(projectId!),
     enabled: !!projectId,
   });
+
+  // Mutation pour mettre à jour le projet
+  const updateProjectMutation = useMutation({
+    mutationFn: (data: { name: string }) => projectsApi.update(projectId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setIsEditingTitle(false);
+      toast.success('Titre du projet mis à jour');
+    },
+    onError: () => {
+      toast.error('Erreur lors de la mise à jour');
+    },
+  });
+
+  // Focus sur l'input quand on passe en mode édition
+  useEffect(() => {
+    if (isEditingTitle && titleInputRef.current) {
+      titleInputRef.current.focus();
+      titleInputRef.current.select();
+    }
+  }, [isEditingTitle]);
+
+  const startEditingTitle = () => {
+    if (project) {
+      setEditedTitle(project.name);
+      setIsEditingTitle(true);
+    }
+  };
+
+  const cancelEditingTitle = () => {
+    setIsEditingTitle(false);
+    setEditedTitle('');
+  };
+
+  const saveTitle = () => {
+    if (editedTitle.trim() && editedTitle.trim() !== project?.name) {
+      updateProjectMutation.mutate({ name: editedTitle.trim() });
+    } else {
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      saveTitle();
+    } else if (e.key === 'Escape') {
+      cancelEditingTitle();
+    }
+  };
 
   // Group tools by phase
   const toolsByPhase = useMemo(() => {
@@ -197,7 +255,46 @@ export default function ProjectDetailPage() {
               {project.name.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-bold">{project.name}</h1>
+              {isEditingTitle ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={titleInputRef}
+                    type="text"
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    onKeyDown={handleTitleKeyDown}
+                    className="text-2xl font-bold border-b-2 border-define focus:outline-none focus:border-define bg-transparent"
+                    disabled={updateProjectMutation.isPending}
+                  />
+                  <button
+                    onClick={saveTitle}
+                    disabled={updateProjectMutation.isPending}
+                    className="p-1 text-improve hover:bg-improve-light rounded transition-colors"
+                    title="Enregistrer"
+                  >
+                    <Check className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={cancelEditingTitle}
+                    disabled={updateProjectMutation.isPending}
+                    className="p-1 text-control hover:bg-control-light rounded transition-colors"
+                    title="Annuler"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <h1 className="text-2xl font-bold">{project.name}</h1>
+                  <button
+                    onClick={startEditingTitle}
+                    className="p-1 text-gray-400 hover:text-define opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Modifier le titre"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
               <p className="text-gray-500">{project.code}</p>
             </div>
           </div>

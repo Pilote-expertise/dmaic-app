@@ -10,6 +10,7 @@ import projectRoutes from './routes/projects';
 import toolRoutes from './routes/tools';
 import dashboardRoutes from './routes/dashboard';
 import notificationRoutes from './routes/notifications';
+import adminRoutes from './routes/admin';
 import { authMiddleware } from './middleware/auth';
 import { setupWebSocket } from './websocket';
 
@@ -44,6 +45,7 @@ app.use('/api/projects', authMiddleware, projectRoutes);
 app.use('/api/tools', authMiddleware, toolRoutes);
 app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 app.use('/api/notifications', authMiddleware, notificationRoutes);
+app.use('/api/admin', adminRoutes); // Auth et admin middleware inclus dans le routeur
 
 // Health check
 app.get('/api/health', (req, res) => {

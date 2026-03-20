@@ -50,6 +50,21 @@ interface CTQMeasureTemplateProps {
   readOnly?: boolean;
 }
 
+const getDefaultData = (): CTQMeasureData => ({
+  measurements: [],
+  summary: {
+    totalCTQs: 0,
+    measured: 0,
+    inSpec: 0,
+    outOfSpec: 0,
+    marginal: 0,
+    avgCpk: null,
+  },
+  measurementDate: new Date().toISOString().split('T')[0],
+  measuredBy: '',
+  overallConclusion: '',
+});
+
 const CTQMeasureTemplate: React.FC<CTQMeasureTemplateProps> = ({
   data,
   onChange,
@@ -57,28 +72,15 @@ const CTQMeasureTemplate: React.FC<CTQMeasureTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<CTQMeasureData>(() => {
-    return data || {
-      measurements: [],
-      summary: {
-        totalCTQs: 0,
-        measured: 0,
-        inSpec: 0,
-        outOfSpec: 0,
-        marginal: 0,
-        avgCpk: null,
-      },
-      measurementDate: new Date().toISOString().split('T')[0],
-      measuredBy: '',
-      overallConclusion: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [rawDataInput, setRawDataInput] = useState<string>('');
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

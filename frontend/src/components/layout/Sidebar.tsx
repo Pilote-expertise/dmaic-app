@@ -3,8 +3,7 @@ import {
   LayoutDashboard,
   FolderKanban,
   BarChart3,
-  Users,
-  Settings,
+  Shield,
   HelpCircle,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
@@ -17,8 +16,7 @@ const mainNavItems = [
 ];
 
 const adminNavItems = [
-  { icon: Users, label: 'Utilisateurs', path: '/users' },
-  { icon: Settings, label: 'Paramètres', path: '/settings' },
+  { icon: Shield, label: 'Administration', path: '/admin' },
 ];
 
 export default function Sidebar() {

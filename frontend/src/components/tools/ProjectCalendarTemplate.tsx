@@ -47,29 +47,33 @@ const EVENT_TYPES = [
   { value: 'other', label: 'Autre', icon: '📌', color: 'bg-gray-500' },
 ];
 
+const getDefaultData = (): ProjectCalendarData => {
+  const now = new Date();
+  return {
+    events: [],
+    currentView: 'month',
+    selectedMonth: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+    projectPhases: [],
+    notes: '',
+  };
+};
+
 const ProjectCalendarTemplate: React.FC<ProjectCalendarTemplateProps> = ({
   data,
   onChange,
   toolDefinition,
   readOnly = false,
 }) => {
-  const now = new Date();
   const [localData, setLocalData] = useState<ProjectCalendarData>(() => {
-    return data || {
-      events: [],
-      currentView: 'month',
-      selectedMonth: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
-      projectPhases: [],
-      notes: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMAIC Manager - Charte de Projet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --define-color: #2563eb;
+            --define-light: #dbeafe;
+            --measure-color: #16a34a;
+            --analyze-color: #ea580c;
+            --improve-color: #9333ea;
+            --control-color: #dc2626;
+            --bg-dark: #0f172a;
+            --bg-sidebar: #1e293b;
+            --bg-main: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #e2e8f0;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 32px; }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--define-color), var(--control-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: white; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-sidebar);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--improve-color), var(--define-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-top: 64px;
+            padding: 32px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .tool-title-section h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .phase-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--define-light);
+            color: var(--define-color);
+        }
+
+        .tool-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tool-actions { display: flex; gap: 12px; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary { background: var(--define-color); color: white; }
+        .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-secondary { background: white; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #f1f5f9; }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .form-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--define-light);
+            color: var(--define-color);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .required-badge {
+            margin-left: auto;
+            padding: 4px 10px;
+            background: #fee2e2;
+            color: #dc2626;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Form Fields */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-grid.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label .required {
+            color: #dc2626;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-input:hover,
+        .form-textarea:hover,
+        .form-select:hover {
+            border-color: #cbd5e1;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--define-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Date range */
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-range .form-input {
+            flex: 1;
+        }
+
+        .date-separator {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Team members */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-main);
+            border-radius: 10px;
+        }
+
+        .member-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: white;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+
+        .member-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .member-role {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .member-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .member-badge.sponsor {
+            background: var(--improve-light);
+            color: var(--improve-color);
+        }
+
+        .member-badge.leader {
+            background: var(--define-light);
+            color: var(--define-color);
+        }
+
+        .member-badge.member {
+            background: var(--bg-main);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .remove-member {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-member:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .add-member-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border: 1px dashed var(--border-color);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-member-btn:hover {
+            border-color: var(--define-color);
+            color: var(--define-color);
+            background: var(--define-light);
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .metric-card {
+            padding: 16px;
+            background: var(--bg-main);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .metric-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            text-align: right;
+        }
+
+        .metric-input:focus {
+            outline: none;
+            border-color: var(--define-color);
+        }
+
+        .metric-unit {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            min-width: 30px;
+        }
+
+        /* Progress indicator */
+        .completion-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            position: sticky;
+            bottom: 24px;
+        }
+
+        .completion-text {
+            font-weight: 500;
+        }
+
+        .completion-track {
+            flex: 1;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .completion-fill {
+            height: 100%;
+            background: var(--define-color);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .completion-percent {
+            font-weight: 600;
+            color: var(--define-color);
+        }
+
+        .completion-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">6σ</div>
+                <span>DMAIC Manager</span>
+            </div>
+            <div class="breadcrumb">
+                <a href="#">Amélioration Ligne A3</a>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span>Define</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span style="color: white;">Charte de projet</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </button>
+            <div class="user-avatar">JD</div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="tool-header">
+            <div class="tool-title-section">
+                <h1>
+                    Charte de Projet
+                    <span class="phase-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Define
+                    </span>
+                </h1>
+                <p class="tool-description">Document fondateur du projet DMAIC - Définit le périmètre, les objectifs et l'équipe</p>
+            </div>
+            <div class="tool-actions">
+                <button class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    Historique
+                </button>
+                <button class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    </svg>
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+
+        <!-- Identification Section -->
+        <div class="form-card">
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Identification du projet</h2>
+                        <p class="section-subtitle">Informations générales et contexte</p>
+                    </div>
+                    <span class="required-badge">Obligatoire</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Titre du projet <span class="required">*</span></label>
+                        <input type="text" class="form-input" value="Amélioration Ligne de Production A3" placeholder="Nom du projet DMAIC">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Code projet</label>
+                        <input type="text" class="form-input" value="DMAIC-2024-015" placeholder="Ex: DMAIC-2024-001">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Service / Département</label>
+                        <select class="form-select">
+                            <option>Production</option>
+                            <option>Qualité</option>
+                            <option>Logistique</option>
+                            <option>Maintenance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Description du problème <span class="required">*</span></label>
+                        <textarea class="form-textarea" placeholder="Décrivez le problème à résoudre de manière factuelle...">La ligne de production A3 présente un taux de défauts de 4.2%, soit 2.2 points au-dessus de l'objectif qualité de 2%. Les principales non-conformités identifiées sont les bavures sur pièces découpées et les défauts dimensionnels après pliage.</textarea>
+                        <span class="form-hint">Soyez factuel et quantitatif autant que possible</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scope Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Périmètre</h2>
+                        <p class="section-subtitle">Délimitation du champ d'action</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Inclus dans le périmètre <span class="required">*</span></label>
+                        <textarea class="form-textarea" placeholder="Ce qui est concerné par le projet...">- Poste de découpe laser
+- Poste de pliage
+- Contrôle qualité en ligne
+- Process de production standard</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Exclus du périmètre</label>
+                        <textarea class="form-textarea" placeholder="Ce qui n'est pas concerné...">- Assemblage final
+- Expédition
+- Produits spéciaux / prototypes
+- Maintenance préventive générale</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectives Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Objectifs et indicateurs</h2>
+                        <p class="section-subtitle">Cibles mesurables du projet</p>
+                    </div>
+                    <span class="required-badge">Obligatoire</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label class="form-label">Objectif principal <span class="required">*</span></label>
+                    <textarea class="form-textarea" placeholder="Décrivez l'objectif SMART du projet...">Réduire le taux de défauts de la ligne A3 de 4.2% à 2% maximum d'ici fin Q2 2024, sans impacter la cadence de production ni augmenter les coûts de fabrication.</textarea>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Valeur actuelle</span>
+                        <div class="metric-input-row">
+                            <input type="text" class="metric-input" value="4.2">
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Valeur cible</span>
+                        <div class="metric-input-row">
+                            <input type="text" class="metric-input" value="2.0">
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Amélioration visée</span>
+                        <div class="metric-input-row">
+                            <input type="text" class="metric-input" value="52" readonly style="background: var(--define-light); border-color: var(--define-color); color: var(--define-color); font-weight: 600;">
+                            <span class="metric-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Planning</h2>
+                        <p class="section-subtitle">Dates clés du projet</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Période du projet <span class="required">*</span></label>
+                        <div class="date-range">
+                            <input type="date" class="form-input" value="2024-01-15">
+                            <span class="date-separator">au</span>
+                            <input type="date" class="form-input" value="2024-06-30">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jalon Define</label>
+                        <input type="date" class="form-input" value="2024-02-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jalon Measure</label>
+                        <input type="date" class="form-input" value="2024-03-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jalon Analyze</label>
+                        <input type="date" class="form-input" value="2024-04-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Jalon Improve</label>
+                        <input type="date" class="form-input" value="2024-05-15">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Section -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="section-title">Équipe projet</h2>
+                        <p class="section-subtitle">Membres et rôles</p>
+                    </div>
+                </div>
+
+                <div class="team-list">
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: var(--improve-color);">PD</div>
+                        <div class="member-info">
+                            <div class="member-name">Philippe Durand</div>
+                            <div class="member-role">Directeur Production</div>
+                        </div>
+                        <span class="member-badge sponsor">Sponsor</span>
+                        <button class="remove-member">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: var(--define-color);">JD</div>
+                        <div class="member-info">
+                            <div class="member-name">Jean Dupont</div>
+                            <div class="member-role">Ingénieur Qualité</div>
+                        </div>
+                        <span class="member-badge leader">Chef de projet</span>
+                        <button class="remove-member">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: var(--measure-color);">ML</div>
+                        <div class="member-info">
+                            <div class="member-name">Marie Leroux</div>
+                            <div class="member-role">Technicienne Méthodes</div>
+                        </div>
+                        <span class="member-badge member">Membre</span>
+                        <button class="remove-member">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="team-member">
+                        <div class="member-avatar" style="background: var(--analyze-color);">PT</div>
+                        <div class="member-info">
+                            <div class="member-name">Pierre Thomas</div>
+                            <div class="member-role">Opérateur Ligne A3</div>
+                        </div>
+                        <span class="member-badge member">Membre</span>
+                        <button class="remove-member">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button class="add-member-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Ajouter un membre
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Bar -->
+        <div class="completion-bar">
+            <span class="completion-text">Complétion</span>
+            <div class="completion-track">
+                <div class="completion-fill" style="width: 85%;"></div>
+            </div>
+            <span class="completion-percent">85%</span>
+            <div class="completion-actions">
+                <button class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                    Précédent
+                </button>
+                <button class="btn btn-primary">
+                    Suivant: CTQ
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

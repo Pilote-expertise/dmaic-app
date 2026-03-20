@@ -49,6 +49,13 @@ import TrainingTemplate from '@/components/tools/TrainingTemplate';
 import GainsCalculationTemplate from '@/components/tools/GainsCalculationTemplate';
 import ProjectClosureTemplate from '@/components/tools/ProjectClosureTemplate';
 
+// Statistical Analysis templates
+import CapabilityTemplate from '@/components/tools/CapabilityTemplate';
+import HypothesisTestTemplate from '@/components/tools/HypothesisTestTemplate';
+import DOETemplate from '@/components/tools/DOETemplate';
+import SPCTemplate from '@/components/tools/SPCTemplate';
+import ControlChartTemplate from '@/components/tools/ControlChartTemplate';
+
 const phaseConfig = {
   DEFINE: { color: 'bg-define', textColor: 'text-define', label: 'Définir' },
   MEASURE: { color: 'bg-measure', textColor: 'text-measure', label: 'Mesurer' },
@@ -123,12 +130,20 @@ const toolTemplates: Record<string, React.ComponentType<any>> = {
   // ============ General/Legacy ============
   GATE_REVIEW: ChecklistTemplate,
   VALIDATION: ChecklistTemplate,
-  CAPABILITY: DefaultTemplate,
-  HYPOTHESIS_TEST: DefaultTemplate,
-  DOE: DefaultTemplate,
   PILOT: ChecklistTemplate,
-  SPC: DefaultTemplate,
-  CONTROL_CHART: DefaultTemplate,
+
+  // ============ Statistical Analysis Templates ============
+  CAPABILITY: CapabilityTemplate,
+  CAPABILITY_ANALYSIS: CapabilityTemplate,
+  PROCESS_CAPABILITY: CapabilityTemplate,
+  HYPOTHESIS_TEST: HypothesisTestTemplate,
+  HYPOTHESIS_TESTING: HypothesisTestTemplate,
+  DOE: DOETemplate,
+  DESIGN_OF_EXPERIMENTS: DOETemplate,
+  SPC: SPCTemplate,
+  STATISTICAL_PROCESS_CONTROL: SPCTemplate,
+  CONTROL_CHART: ControlChartTemplate,
+  CONTROL_CHARTS: ControlChartTemplate,
 };
 
 export default function ToolPage() {
@@ -175,7 +190,19 @@ export default function ToolPage() {
   // Initialize data when instance loads
   useEffect(() => {
     if (toolInstance?.data) {
-      setData(toolInstance.data as Record<string, any>);
+      // Parse JSON string from backend if needed
+      let parsedData: Record<string, any>;
+      if (typeof toolInstance.data === 'string') {
+        try {
+          parsedData = JSON.parse(toolInstance.data);
+        } catch (e) {
+          console.error('Error parsing tool data:', e);
+          parsedData = {};
+        }
+      } else {
+        parsedData = toolInstance.data as Record<string, any>;
+      }
+      setData(parsedData);
     } else if (toolDefinition?.schema) {
       // Initialize with empty schema structure
       setData({});
@@ -190,7 +217,7 @@ export default function ToolPage() {
       } else {
         return toolsApi.createToolInstance({
           projectId: projectId!,
-          toolDefinitionId: toolId!,
+          toolDefinitionId: toolDefinition!.id,
           data: saveData.data,
         });
       }

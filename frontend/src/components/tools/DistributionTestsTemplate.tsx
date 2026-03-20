@@ -30,6 +30,16 @@ interface DistributionTestsTemplateProps {
   readOnly?: boolean;
 }
 
+const getDefaultData = (): DistributionTestsData => ({
+  testType: 'shapiro-wilk',
+  alpha: 0.05,
+  rawData: '',
+  parsedData: [],
+  results: null,
+  conclusion: '',
+  nextSteps: '',
+});
+
 const DistributionTestsTemplate: React.FC<DistributionTestsTemplateProps> = ({
   data,
   onChange,
@@ -37,20 +47,12 @@ const DistributionTestsTemplate: React.FC<DistributionTestsTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<DistributionTestsData>(() => {
-    return data || {
-      testType: 'shapiro-wilk',
-      alpha: 0.05,
-      rawData: '',
-      parsedData: [],
-      results: null,
-      conclusion: '',
-      nextSteps: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

@@ -73,6 +73,28 @@ const CATEGORIES = [
   'Autre',
 ];
 
+const getDefaultData = (): GainsCalculationData => ({
+  projectName: '',
+  calculationDate: new Date().toISOString().split('T')[0],
+  financialController: '',
+  gains: [],
+  additionalCosts: [],
+  summary: {
+    totalHardSavings: 0,
+    totalSoftSavings: 0,
+    totalCostAvoidance: 0,
+    totalRevenueIncrease: 0,
+    totalGross: 0,
+    totalCosts: 0,
+    totalNet: 0,
+    roi: 0,
+    paybackMonths: 0,
+  },
+  validationStatus: 'draft',
+  validationComments: '',
+  overallConclusion: '',
+});
+
 const GainsCalculationTemplate: React.FC<GainsCalculationTemplateProps> = ({
   data,
   onChange,
@@ -80,34 +102,14 @@ const GainsCalculationTemplate: React.FC<GainsCalculationTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<GainsCalculationData>(() => {
-    return data || {
-      projectName: '',
-      calculationDate: new Date().toISOString().split('T')[0],
-      financialController: '',
-      gains: [],
-      additionalCosts: [],
-      summary: {
-        totalHardSavings: 0,
-        totalSoftSavings: 0,
-        totalCostAvoidance: 0,
-        totalRevenueIncrease: 0,
-        totalGross: 0,
-        totalCosts: 0,
-        totalNet: 0,
-        roi: 0,
-        paybackMonths: 0,
-      },
-      validationStatus: 'draft',
-      validationComments: '',
-      overallConclusion: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [editingGain, setEditingGain] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

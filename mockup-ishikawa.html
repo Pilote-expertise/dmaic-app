@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMAIC Manager - Diagramme Ishikawa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --define-color: #2563eb;
+            --measure-color: #16a34a;
+            --analyze-color: #ea580c;
+            --analyze-light: #ffedd5;
+            --improve-color: #9333ea;
+            --control-color: #dc2626;
+            --bg-dark: #0f172a;
+            --bg-sidebar: #1e293b;
+            --bg-main: #f8fafc;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #e2e8f0;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+            /* 6M Colors */
+            --milieu: #3b82f6;
+            --matiere: #8b5cf6;
+            --methode: #ec4899;
+            --main-oeuvre: #f59e0b;
+            --machine: #10b981;
+            --mesure: #06b6d4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 32px; }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--define-color), var(--control-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: white; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-sidebar);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--improve-color), var(--define-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-top: 64px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 64px);
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .tool-title-section h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .phase-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--analyze-light);
+            color: var(--analyze-color);
+        }
+
+        .tool-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tool-actions { display: flex; gap: 12px; }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary { background: var(--analyze-color); color: white; }
+        .btn-primary:hover { filter: brightness(1.1); }
+        .btn-secondary { background: white; color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #f1f5f9; }
+
+        /* Ishikawa Container */
+        .ishikawa-container {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ishikawa-toolbar {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            border-color: var(--analyze-color);
+            color: var(--analyze-color);
+        }
+
+        .zoom-level {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: var(--bg-main);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+        }
+
+        /* Diagram Area */
+        .diagram-area {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            background:
+                radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .fishbone {
+            position: relative;
+            width: 1100px;
+            height: 550px;
+        }
+
+        /* Main spine */
+        .spine {
+            position: absolute;
+            top: 50%;
+            left: 50px;
+            right: 50px;
+            height: 6px;
+            background: var(--analyze-color);
+            transform: translateY(-50%);
+            border-radius: 3px;
+        }
+
+        .spine::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 15px solid transparent;
+            border-left: 20px solid var(--analyze-color);
+        }
+
+        /* Effect box */
+        .effect-box {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--analyze-color);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            max-width: 180px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .effect-box:hover {
+            transform: translateY(-50%) scale(1.02);
+        }
+
+        .effect-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 100%;
+        }
+
+        .effect-box input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .effect-box input:focus {
+            outline: none;
+        }
+
+        /* Category branches */
+        .category {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .category-label {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 2;
+        }
+
+        .category-label:hover {
+            transform: scale(1.05);
+        }
+
+        .category.milieu .category-label { background: var(--milieu); }
+        .category.matiere .category-label { background: var(--matiere); }
+        .category.methode .category-label { background: var(--methode); }
+        .category.main-oeuvre .category-label { background: var(--main-oeuvre); }
+        .category.machine .category-label { background: var(--machine); }
+        .category.mesure .category-label { background: var(--mesure); }
+
+        .category-line {
+            position: absolute;
+            width: 3px;
+            background: currentColor;
+            z-index: 1;
+        }
+
+        /* Top categories */
+        .category.top { top: 30px; }
+        .category.top .category-line {
+            top: 100%;
+            height: calc(50% - 30px);
+            left: 50%;
+            transform: translateX(-50%) rotate(25deg);
+            transform-origin: top center;
+        }
+
+        /* Bottom categories */
+        .category.bottom { bottom: 30px; }
+        .category.bottom .category-line {
+            bottom: 100%;
+            height: calc(50% - 30px);
+            left: 50%;
+            transform: translateX(-50%) rotate(-25deg);
+            transform-origin: bottom center;
+        }
+
+        /* Position categories */
+        .category:nth-child(1) { left: 100px; }
+        .category:nth-child(2) { left: 350px; }
+        .category:nth-child(3) { left: 600px; }
+
+        /* Cause items */
+        .causes {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .category.top .causes {
+            top: 60px;
+            left: 50%;
+            transform: translateX(-30%);
+        }
+
+        .category.bottom .causes {
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-30%);
+        }
+
+        .cause-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            max-width: 180px;
+        }
+
+        .cause-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .cause-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .category.milieu .cause-dot { background: var(--milieu); }
+        .category.matiere .cause-dot { background: var(--matiere); }
+        .category.methode .cause-dot { background: var(--methode); }
+        .category.main-oeuvre .cause-dot { background: var(--main-oeuvre); }
+        .category.machine .cause-dot { background: var(--machine); }
+        .category.mesure .cause-dot { background: var(--mesure); }
+
+        .add-cause {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-main);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-cause:hover {
+            border-color: var(--analyze-color);
+            color: var(--analyze-color);
+            background: var(--analyze-light);
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            right: 32px;
+            top: 96px;
+            width: 300px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title svg {
+            color: var(--analyze-color);
+        }
+
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-main);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .category-item:hover {
+            background: var(--border-color);
+        }
+
+        .category-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .category-item.milieu .category-color { background: var(--milieu); }
+        .category-item.matiere .category-color { background: var(--matiere); }
+        .category-item.methode .category-color { background: var(--methode); }
+        .category-item.main-oeuvre .category-color { background: var(--main-oeuvre); }
+        .category-item.machine .category-color { background: var(--machine); }
+        .category-item.mesure .category-color { background: var(--mesure); }
+
+        .category-name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .category-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .panel-hint {
+            margin-top: 16px;
+            padding: 12px;
+            background: #fffbeb;
+            border-radius: 8px;
+            border-left: 3px solid #f59e0b;
+            font-size: 0.8rem;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .side-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">6σ</div>
+                <span>DMAIC Manager</span>
+            </div>
+            <div class="breadcrumb">
+                <a href="#">Amélioration Ligne A3</a>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span>Analyze</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span style="color: white;">Ishikawa</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+            </button>
+            <div class="user-avatar">JD</div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="tool-header">
+            <div class="tool-title-section">
+                <h1>
+                    Diagramme Causes-Effets
+                    <span class="phase-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Analyze
+                    </span>
+                </h1>
+                <p class="tool-description">Diagramme d'Ishikawa - Méthode des 6M pour l'analyse des causes racines</p>
+            </div>
+            <div class="tool-actions">
+                <button class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Exporter PNG
+                </button>
+                <button class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    </svg>
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+
+        <div class="ishikawa-container">
+            <div class="ishikawa-toolbar">
+                <div class="zoom-controls">
+                    <button class="zoom-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                    <span class="zoom-level">100%</span>
+                    <button class="zoom-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            <line x1="11" y1="8" x2="11" y2="14"/>
+                            <line x1="8" y1="11" x2="14" y2="11"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mode-toggle">
+                    <button class="mode-btn active">Édition</button>
+                    <button class="mode-btn">Lecture seule</button>
+                </div>
+            </div>
+
+            <div class="diagram-area">
+                <div class="fishbone">
+                    <!-- Main spine -->
+                    <div class="spine"></div>
+
+                    <!-- Effect box -->
+                    <div class="effect-box">
+                        <input type="text" value="Défauts qualité sur ligne A3" placeholder="Effet / Problème">
+                    </div>
+
+                    <!-- Top categories -->
+                    <div class="category top milieu" style="left: 100px; color: var(--milieu);">
+                        <div class="category-label">Milieu</div>
+                        <div class="category-line"></div>
+                        <div class="causes">
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Température variable
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Éclairage insuffisant
+                            </div>
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="category top matiere" style="left: 350px; color: var(--matiere);">
+                        <div class="category-label">Matière</div>
+                        <div class="category-line"></div>
+                        <div class="causes">
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Qualité acier variable
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Lot non conforme
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Stockage inadapté
+                            </div>
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="category top methode" style="left: 600px; color: var(--methode);">
+                        <div class="category-label">Méthode</div>
+                        <div class="category-line"></div>
+                        <div class="causes">
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Procédure obsolète
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Séquence incorrecte
+                            </div>
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bottom categories -->
+                    <div class="category bottom main-oeuvre" style="left: 100px; color: var(--main-oeuvre);">
+                        <div class="causes">
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Formation insuffisante
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Fatigue équipe nuit
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Rotation personnel
+                            </div>
+                        </div>
+                        <div class="category-line"></div>
+                        <div class="category-label">Main d'œuvre</div>
+                    </div>
+
+                    <div class="category bottom machine" style="left: 350px; color: var(--machine);">
+                        <div class="causes">
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Usure tête laser
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Calibration dérivée
+                            </div>
+                        </div>
+                        <div class="category-line"></div>
+                        <div class="category-label">Machine</div>
+                    </div>
+
+                    <div class="category bottom mesure" style="left: 600px; color: var(--mesure);">
+                        <div class="causes">
+                            <button class="add-cause">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Ajouter
+                            </button>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Instruments non étalonnés
+                            </div>
+                            <div class="cause-item">
+                                <span class="cause-dot"></span>
+                                Fréquence contrôle faible
+                            </div>
+                        </div>
+                        <div class="category-line"></div>
+                        <div class="category-label">Mesure</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div class="side-panel">
+            <h3 class="panel-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18"/>
+                    <path d="M9 21V9"/>
+                </svg>
+                Catégories (6M)
+            </h3>
+            <div class="category-list">
+                <div class="category-item milieu">
+                    <div class="category-color"></div>
+                    <span class="category-name">Milieu</span>
+                    <span class="category-count">2</span>
+                </div>
+                <div class="category-item matiere">
+                    <div class="category-color"></div>
+                    <span class="category-name">Matière</span>
+                    <span class="category-count">3</span>
+                </div>
+                <div class="category-item methode">
+                    <div class="category-color"></div>
+                    <span class="category-name">Méthode</span>
+                    <span class="category-count">2</span>
+                </div>
+                <div class="category-item main-oeuvre">
+                    <div class="category-color"></div>
+                    <span class="category-name">Main d'œuvre</span>
+                    <span class="category-count">3</span>
+                </div>
+                <div class="category-item machine">
+                    <div class="category-color"></div>
+                    <span class="category-name">Machine</span>
+                    <span class="category-count">2</span>
+                </div>
+                <div class="category-item mesure">
+                    <div class="category-color"></div>
+                    <span class="category-name">Mesure</span>
+                    <span class="category-count">2</span>
+                </div>
+            </div>
+
+            <div class="panel-hint">
+                <strong>Conseil :</strong> Cliquez sur une catégorie pour la mettre en surbrillance. Double-cliquez sur une cause pour la modifier.
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -4,11 +4,14 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 // Pages
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import ProjectsPage from '@/pages/ProjectsPage';
 import ProjectDetailPage from '@/pages/ProjectDetailPage';
 import ToolPage from '@/pages/ToolPage';
 import ReportsPage from '@/pages/ReportsPage';
+import AdminPage from '@/pages/AdminPage';
 
 // Layout
 import MainLayout from '@/components/layout/MainLayout';
@@ -54,6 +57,25 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Admin Route wrapper (requires admin role)
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-12 h-12 border-4 border-define border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -74,6 +96,22 @@ function AppRoutes() {
           </PublicRoute>
         }
       />
+      <Route
+        path="/forgot-password"
+        element={
+          <PublicRoute>
+            <ForgotPasswordPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <PublicRoute>
+            <ResetPasswordPage />
+          </PublicRoute>
+        }
+      />
 
       {/* Protected routes */}
       <Route
@@ -89,6 +127,14 @@ function AppRoutes() {
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="projects/:projectId/tools/:toolId" element={<ToolPage />} />
         <Route path="reports" element={<ReportsPage />} />
+        <Route
+          path="admin"
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
+          }
+        />
       </Route>
 
       {/* Catch all */}

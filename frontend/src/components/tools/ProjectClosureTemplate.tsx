@@ -75,6 +75,66 @@ interface ProjectClosureTemplateProps {
   readOnly?: boolean;
 }
 
+const getDefaultData = (): ProjectClosureData => ({
+  projectInfo: {
+    projectName: '',
+    projectCode: '',
+    startDate: '',
+    endDate: new Date().toISOString().split('T')[0],
+    plannedEndDate: '',
+    projectLeader: '',
+    sponsor: '',
+    team: [],
+  },
+  objectives: [],
+  finalStatus: 'objectives-achieved',
+  financialSummary: {
+    totalInvestment: 0,
+    totalGains: 0,
+    roi: 0,
+    paybackMonths: 0,
+    gainsValidatedBy: '',
+    gainsValidationDate: '',
+  },
+  sustainability: {
+    controlPlanInPlace: false,
+    controlPlanNotes: '',
+    trainingCompleted: false,
+    trainingNotes: '',
+    proceduresUpdated: false,
+    proceduresNotes: '',
+    ownershipTransferred: false,
+    processOwner: '',
+    monitoringPlan: '',
+  },
+  lessonsLearned: {
+    whatWorkedWell: '',
+    whatCouldBeImproved: '',
+    recommendations: '',
+    toolsMethodsUsed: '',
+  },
+  replication: {
+    replicationOpportunities: '',
+    estimatedAdditionalGains: 0,
+    nextSteps: '',
+  },
+  signatures: {
+    projectLeaderSignature: false,
+    projectLeaderDate: '',
+    sponsorSignature: false,
+    sponsorDate: '',
+    financeSignature: false,
+    financeDate: '',
+  },
+  celebration: {
+    celebrationPlanned: false,
+    celebrationDate: '',
+    celebrationDetails: '',
+  },
+  closureDate: '',
+  finalRemarks: '',
+});
+
 const ProjectClosureTemplate: React.FC<ProjectClosureTemplateProps> = ({
   data,
   onChange,
@@ -82,72 +142,14 @@ const ProjectClosureTemplate: React.FC<ProjectClosureTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<ProjectClosureData>(() => {
-    return data || {
-      projectInfo: {
-        projectName: '',
-        projectCode: '',
-        startDate: '',
-        endDate: new Date().toISOString().split('T')[0],
-        plannedEndDate: '',
-        projectLeader: '',
-        sponsor: '',
-        team: [],
-      },
-      objectives: [],
-      finalStatus: 'objectives-achieved',
-      financialSummary: {
-        totalInvestment: 0,
-        totalGains: 0,
-        roi: 0,
-        paybackMonths: 0,
-        gainsValidatedBy: '',
-        gainsValidationDate: '',
-      },
-      sustainability: {
-        controlPlanInPlace: false,
-        controlPlanNotes: '',
-        trainingCompleted: false,
-        trainingNotes: '',
-        proceduresUpdated: false,
-        proceduresNotes: '',
-        ownershipTransferred: false,
-        processOwner: '',
-        monitoringPlan: '',
-      },
-      lessonsLearned: {
-        whatWorkedWell: '',
-        whatCouldBeImproved: '',
-        recommendations: '',
-        toolsMethodsUsed: '',
-      },
-      replication: {
-        replicationOpportunities: '',
-        estimatedAdditionalGains: 0,
-        nextSteps: '',
-      },
-      signatures: {
-        projectLeaderSignature: false,
-        projectLeaderDate: '',
-        sponsorSignature: false,
-        sponsorDate: '',
-        financeSignature: false,
-        financeDate: '',
-      },
-      celebration: {
-        celebrationPlanned: false,
-        celebrationDate: '',
-        celebrationDetails: '',
-      },
-      closureDate: '',
-      finalRemarks: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [newTeamMember, setNewTeamMember] = useState('');
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

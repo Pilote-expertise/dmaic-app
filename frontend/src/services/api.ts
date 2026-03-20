@@ -50,7 +50,7 @@ export const authApi = {
     return data;
   },
 
-  register: async (userData: RegisterData): Promise<AuthResponse> => {
+  register: async (userData: RegisterData): Promise<{ message: string; requestId: string }> => {
     const { data } = await api.post('/auth/register', userData);
     return data;
   },
@@ -62,6 +62,16 @@ export const authApi = {
 
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
+  },
+
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const { data } = await api.post('/auth/forgot-password', { email });
+    return data;
+  },
+
+  resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
+    const { data } = await api.post('/auth/reset-password', { token, password });
+    return data;
   },
 };
 
@@ -265,5 +275,83 @@ export const notificationsApi = {
 
   delete: async (id: string): Promise<void> => {
     await api.delete(`/notifications/${id}`);
+  },
+};
+
+// ============ ADMIN ============
+export const adminApi = {
+  // Access Requests
+  getAccessRequests: async (status?: string): Promise<any[]> => {
+    const { data } = await api.get('/admin/access-requests', {
+      params: status ? { status } : undefined,
+    });
+    return data;
+  },
+
+  approveRequest: async (id: string): Promise<{ message: string; user: any }> => {
+    const { data } = await api.post(`/admin/access-requests/${id}/approve`);
+    return data;
+  },
+
+  rejectRequest: async (id: string, reason?: string): Promise<{ message: string }> => {
+    const { data } = await api.post(`/admin/access-requests/${id}/reject`, { reason });
+    return data;
+  },
+
+  // Users
+  getUsers: async (search?: string, role?: string): Promise<any[]> => {
+    const { data } = await api.get('/admin/users', {
+      params: { search, role },
+    });
+    return data;
+  },
+
+  updateUser: async (id: string, userData: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    role?: string;
+  }): Promise<any> => {
+    const { data } = await api.put(`/admin/users/${id}`, userData);
+    return data;
+  },
+
+  deleteUser: async (id: string): Promise<{ message: string }> => {
+    const { data } = await api.delete(`/admin/users/${id}`);
+    return data;
+  },
+
+  forcePasswordReset: async (userId: string): Promise<{ message: string }> => {
+    const { data } = await api.post(`/admin/users/${userId}/reset-password`);
+    return data;
+  },
+
+  // Stats
+  getStats: async (): Promise<{
+    users: { total: number; byRole: Record<string, number> };
+    projects: { total: number; byStatus: Record<string, number> };
+    tools: { total: number; byStatus: Record<string, number> };
+    accessRequests: { pending: number };
+    activity: { last7Days: number; byDay: Record<string, number> };
+  }> => {
+    const { data } = await api.get('/admin/stats');
+    return data;
+  },
+
+  // Audit Logs
+  getAuditLogs: async (params: {
+    page?: number;
+    limit?: number;
+    action?: string;
+    entityType?: string;
+    userId?: string;
+    startDate?: string;
+    endDate?: string;
+  }): Promise<{
+    logs: any[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }> => {
+    const { data } = await api.get('/admin/audit-logs', { params });
+    return data;
   },
 };

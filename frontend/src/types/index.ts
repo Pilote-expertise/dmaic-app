@@ -9,6 +9,20 @@ export interface User {
   createdAt: string;
 }
 
+// Access Request types
+export interface AccessRequest {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  reason?: string;
+  createdAt: string;
+  reviewedAt?: string;
+  reviewedById?: string;
+  reviewedBy?: Pick<User, 'id' | 'firstName' | 'lastName'>;
+}
+
 // Project types
 export type ProjectStatus = 'DRAFT' | 'IN_PROGRESS' | 'COMPLETED' | 'ARCHIVED' | 'ON_HOLD' | 'CANCELLED';
 export type DmaicPhase = 'DEFINE' | 'MEASURE' | 'ANALYZE' | 'IMPROVE' | 'CONTROL';

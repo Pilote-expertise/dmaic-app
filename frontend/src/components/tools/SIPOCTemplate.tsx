@@ -54,11 +54,11 @@ export default function SIPOCTemplate({
   });
 
   useEffect(() => {
-    if (data.rows?.length) {
+    if (Object.keys(data).length > 0) {
       setSipocData({
         processName: data.processName || '',
         processDescription: data.processDescription || '',
-        rows: data.rows,
+        rows: data.rows?.length ? data.rows : [createEmptyRow()],
       });
     }
   }, [data]);

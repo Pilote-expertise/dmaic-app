@@ -49,6 +49,22 @@ const COLORS = [
   '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'
 ];
 
+const getDefaultData = (): BrainstormingData => ({
+  sessionInfo: {
+    objective: '',
+    date: new Date().toISOString().split('T')[0],
+    facilitator: '',
+    participants: [],
+    duration: 60,
+    method: 'classic',
+  },
+  ideas: [],
+  groups: [],
+  selectedIdeas: [],
+  actionPlan: '',
+  nextSteps: '',
+});
+
 const BrainstormingTemplate: React.FC<BrainstormingTemplateProps> = ({
   data,
   onChange,
@@ -56,21 +72,7 @@ const BrainstormingTemplate: React.FC<BrainstormingTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<BrainstormingData>(() => {
-    return data || {
-      sessionInfo: {
-        objective: '',
-        date: new Date().toISOString().split('T')[0],
-        facilitator: '',
-        participants: [],
-        duration: 60,
-        method: 'classic',
-      },
-      ideas: [],
-      groups: [],
-      selectedIdeas: [],
-      actionPlan: '',
-      nextSteps: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [newIdea, setNewIdea] = useState('');
@@ -79,8 +81,8 @@ const BrainstormingTemplate: React.FC<BrainstormingTemplateProps> = ({
   const [newGroupName, setNewGroupName] = useState('');
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

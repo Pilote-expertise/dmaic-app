@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMAIC Manager - Lean Six Sigma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* DMAIC Phase Colors */
+            --define-color: #2563eb;
+            --define-light: #dbeafe;
+            --measure-color: #16a34a;
+            --measure-light: #dcfce7;
+            --analyze-color: #ea580c;
+            --analyze-light: #ffedd5;
+            --improve-color: #9333ea;
+            --improve-light: #f3e8ff;
+            --control-color: #dc2626;
+            --control-light: #fee2e2;
+
+            /* UI Colors */
+            --bg-dark: #0f172a;
+            --bg-sidebar: #1e293b;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #e2e8f0;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            /* Priority badges */
+            --obligatory: #dc2626;
+            --recommended: #f59e0b;
+            --situational: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============ HEADER ============ */
+        .header {
+            background: var(--bg-dark);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--define-color), var(--control-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        .project-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-sidebar);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .project-selector:hover {
+            background: #334155;
+        }
+
+        .project-selector span {
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-sidebar);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .header-btn:hover {
+            background: #334155;
+            transform: translateY(-1px);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: var(--control-color);
+            border-radius: 50%;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--improve-color), var(--define-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ============ MAIN LAYOUT ============ */
+        .main-container {
+            display: flex;
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            width: 300px;
+            background: var(--bg-sidebar);
+            padding: 24px 0;
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        .sidebar-title {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 20px;
+            margin-bottom: 16px;
+        }
+
+        /* DMAIC Stepper */
+        .dmaic-stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .phase-item {
+            cursor: pointer;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            transition: background 0.2s;
+        }
+
+        .phase-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .phase-item.active .phase-header {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .phase-indicator {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .phase-indicator.define { background: var(--define-color); }
+        .phase-indicator.measure { background: var(--measure-color); }
+        .phase-indicator.analyze { background: var(--analyze-color); }
+        .phase-indicator.improve { background: var(--improve-color); }
+        .phase-indicator.control { background: var(--control-color); }
+
+        .phase-indicator .status-ring {
+            position: absolute;
+            inset: -3px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+        }
+
+        .phase-indicator.completed .status-ring {
+            border-color: #22c55e;
+        }
+
+        .phase-indicator.in-progress .status-ring {
+            border-color: #f59e0b;
+            border-style: dashed;
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .phase-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .phase-name {
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .phase-progress {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .phase-expand {
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .phase-item.expanded .phase-expand {
+            transform: rotate(180deg);
+        }
+
+        /* Tools List */
+        .tools-list {
+            display: none;
+            padding: 8px 20px 8px 76px;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .phase-item.expanded .tools-list {
+            display: flex;
+        }
+
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .tool-item.active {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        .tool-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .tool-status.completed { background: #22c55e; }
+        .tool-status.in-progress { background: #f59e0b; }
+        .tool-status.not-started { background: #475569; }
+
+        .tool-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tool-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tool-badge.obligatory {
+            background: rgba(220, 38, 38, 0.2);
+            color: #fca5a5;
+        }
+
+        .tool-badge.recommended {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+
+        .tool-badge.situational {
+            background: rgba(100, 116, 139, 0.2);
+            color: #94a3b8;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 20px;
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .sidebar-action:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-action svg {
+            flex-shrink: 0;
+        }
+
+        /* ============ CONTENT AREA ============ */
+        .content {
+            flex: 1;
+            margin-left: 300px;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 64px);
+        }
+
+        .workspace {
+            flex: 1;
+            padding: 32px;
+            display: flex;
+            gap: 24px;
+        }
+
+        .main-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Tool Header */
+        .tool-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .tool-title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .tool-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .tool-breadcrumb .phase-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .tool-breadcrumb .phase-tag.define {
+            background: var(--define-light);
+            color: var(--define-color);
+        }
+
+        .tool-main-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .tool-main-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .priority-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .priority-badge.obligatory {
+            background: #fee2e2;
+            color: var(--obligatory);
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--define-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        .btn-icon {
+            width: 40px;
+            padding: 10px;
+        }
+
+        /* Tool Card */
+        .tool-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .tool-card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tool-card-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .tool-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-main);
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* SIPOC Table */
+        .sipoc-container {
+            flex: 1;
+            padding: 24px;
+            overflow: auto;
+        }
+
+        .sipoc-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .sipoc-table th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-bottom: 2px solid;
+            position: relative;
+        }
+
+        .sipoc-table th:nth-child(1) {
+            background: var(--define-light);
+            border-color: var(--define-color);
+            color: var(--define-color);
+        }
+        .sipoc-table th:nth-child(2) {
+            background: var(--measure-light);
+            border-color: var(--measure-color);
+            color: var(--measure-color);
+        }
+        .sipoc-table th:nth-child(3) {
+            background: var(--analyze-light);
+            border-color: var(--analyze-color);
+            color: var(--analyze-color);
+        }
+        .sipoc-table th:nth-child(4) {
+            background: var(--improve-light);
+            border-color: var(--improve-color);
+            color: var(--improve-color);
+        }
+        .sipoc-table th:nth-child(5) {
+            background: var(--control-light);
+            border-color: var(--control-color);
+            color: var(--control-color);
+        }
+
+        .sipoc-table th span {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .sipoc-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            font-size: 0.9rem;
+        }
+
+        .sipoc-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .sipoc-cell-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sipoc-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-main);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .sipoc-item-icon {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+        }
+
+        .add-item-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px dashed var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-item-btn:hover {
+            border-color: var(--define-color);
+            color: var(--define-color);
+            background: var(--define-light);
+        }
+
+        /* Help Panel */
+        .help-panel {
+            width: 320px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 180px);
+            transition: all 0.3s ease;
+        }
+
+        .help-panel.collapsed {
+            width: 48px;
+            overflow: hidden;
+        }
+
+        .help-panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .help-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--define-color);
+        }
+
+        .help-panel-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .help-section {
+            margin-bottom: 24px;
+        }
+
+        .help-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-section-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-section-title svg {
+            color: var(--text-secondary);
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .help-tip {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: #fffbeb;
+            border-radius: 8px;
+            border-left: 3px solid #f59e0b;
+            margin-top: 12px;
+        }
+
+        .help-tip-icon {
+            color: #f59e0b;
+            flex-shrink: 0;
+        }
+
+        .help-tip-text {
+            font-size: 0.8rem;
+            color: #92400e;
+            line-height: 1.5;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 12px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .connected-users {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatars {
+            display: flex;
+        }
+
+        .mini-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+            margin-left: -8px;
+        }
+
+        .mini-avatar:first-child {
+            margin-left: 0;
+        }
+
+        .mini-avatar.user-1 { background: var(--define-color); }
+        .mini-avatar.user-2 { background: var(--improve-color); }
+        .mini-avatar.user-3 { background: var(--measure-color); }
+
+        .connected-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .save-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--measure-color);
+        }
+
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--measure-color);
+            border-radius: 50%;
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            border-color: var(--define-color);
+            color: var(--define-color);
+        }
+
+        .nav-btn.primary {
+            background: var(--define-color);
+            color: white;
+            border-color: var(--define-color);
+        }
+
+        .nav-btn.primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .help-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .content {
+                margin-left: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tool-card {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">6σ</div>
+                <span>DMAIC Manager</span>
+            </div>
+            <div class="project-selector">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7H13L11 5H5C3.89543 5 3 5.89543 3 7Z"/>
+                </svg>
+                <span>Amélioration Ligne de Production A3</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"/>
+                </svg>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="M21 21l-4.35-4.35"/>
+                </svg>
+            </button>
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                <span class="notification-badge"></span>
+            </button>
+            <div class="user-avatar">JD</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-title">Étapes DMAIC</div>
+
+            <nav class="dmaic-stepper">
+                <!-- DEFINE -->
+                <div class="phase-item expanded active" data-phase="define">
+                    <div class="phase-header">
+                        <div class="phase-indicator define in-progress">
+                            <span class="status-ring"></span>
+                            D
+                        </div>
+                        <div class="phase-info">
+                            <div class="phase-name">Define</div>
+                            <div class="phase-progress">5/7 outils complétés</div>
+                        </div>
+                        <svg class="phase-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="tools-list">
+                        <div class="tool-item" data-status="completed">
+                            <span class="tool-status completed"></span>
+                            <span class="tool-name">Charte de projet</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item active" data-status="in-progress">
+                            <span class="tool-status in-progress"></span>
+                            <span class="tool-name">SIPOC</span>
+                            <span class="tool-badge recommended">R</span>
+                        </div>
+                        <div class="tool-item" data-status="completed">
+                            <span class="tool-status completed"></span>
+                            <span class="tool-name">CTQ</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="completed">
+                            <span class="tool-status completed"></span>
+                            <span class="tool-name">ROI</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Matrice RACI</span>
+                            <span class="tool-badge recommended">R</span>
+                        </div>
+                        <div class="tool-item" data-status="completed">
+                            <span class="tool-status completed"></span>
+                            <span class="tool-name">Indicateurs Six Sigma</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="completed">
+                            <span class="tool-status completed"></span>
+                            <span class="tool-name">Diagramme de Gantt</span>
+                            <span class="tool-badge recommended">R</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEASURE -->
+                <div class="phase-item" data-phase="measure">
+                    <div class="phase-header">
+                        <div class="phase-indicator measure">
+                            M
+                        </div>
+                        <div class="phase-info">
+                            <div class="phase-name">Measure</div>
+                            <div class="phase-progress">0/7 outils complétés</div>
+                        </div>
+                        <svg class="phase-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="tools-list">
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Plan de collecte de données</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Diagrammes de Pareto</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">MSA</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYZE -->
+                <div class="phase-item" data-phase="analyze">
+                    <div class="phase-header">
+                        <div class="phase-indicator analyze">
+                            A
+                        </div>
+                        <div class="phase-info">
+                            <div class="phase-name">Analyze</div>
+                            <div class="phase-progress">0/4 outils complétés</div>
+                        </div>
+                        <svg class="phase-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="tools-list">
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Diagramme causes-effets</span>
+                            <span class="tool-badge recommended">R</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">AMDEC</span>
+                            <span class="tool-badge recommended">R</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">5 Pourquoi</span>
+                            <span class="tool-badge situational">S</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IMPROVE -->
+                <div class="phase-item" data-phase="improve">
+                    <div class="phase-header">
+                        <div class="phase-indicator improve">
+                            I
+                        </div>
+                        <div class="phase-info">
+                            <div class="phase-name">Improve</div>
+                            <div class="phase-progress">0/7 outils complétés</div>
+                        </div>
+                        <svg class="phase-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="tools-list">
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Brainstorming</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">AMDE</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CONTROL -->
+                <div class="phase-item" data-phase="control">
+                    <div class="phase-header">
+                        <div class="phase-indicator control">
+                            C
+                        </div>
+                        <div class="phase-info">
+                            <div class="phase-name">Control</div>
+                            <div class="phase-progress">0/6 outils complétés</div>
+                        </div>
+                        <svg class="phase-expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </div>
+                    <div class="tools-list">
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Plan de contrôle</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Formation</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                        <div class="tool-item" data-status="not-started">
+                            <span class="tool-status not-started"></span>
+                            <span class="tool-name">Clôture projet</span>
+                            <span class="tool-badge obligatory">O</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="sidebar-action">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                        <path d="M9 21V9"/>
+                    </svg>
+                    <span>Tableau de bord</span>
+                </a>
+                <a href="#" class="sidebar-action" style="margin-top: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 2v6h6"/>
+                        <path d="M16 13H8"/>
+                        <path d="M16 17H8"/>
+                        <path d="M10 9H8"/>
+                    </svg>
+                    <span>Exporter en PDF</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+            <div class="workspace">
+                <div class="main-panel">
+                    <!-- Tool Header -->
+                    <div class="tool-header">
+                        <div class="tool-title-section">
+                            <div class="tool-breadcrumb">
+                                <span class="phase-tag define">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M12 16v-4"/>
+                                        <path d="M12 8h.01"/>
+                                    </svg>
+                                    Define
+                                </span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                                <span>Outil d'analyse</span>
+                            </div>
+                            <div class="tool-main-title">
+                                <h1>SIPOC</h1>
+                                <span class="priority-badge obligatory">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 9v2"/>
+                                        <path d="M12 15h.01"/>
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                    </svg>
+                                    Recommandé
+                                </span>
+                            </div>
+                        </div>
+                        <div class="tool-actions">
+                            <button class="btn btn-secondary btn-icon" title="Historique">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12,6 12,12 16,14"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-secondary">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Exporter
+                            </button>
+                            <button class="btn btn-primary">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                    <polyline points="17,21 17,13 7,13 7,21"/>
+                                    <polyline points="7,3 7,8 15,8"/>
+                                </svg>
+                                Sauvegarder
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tool Card with SIPOC -->
+                    <div class="tool-card">
+                        <div class="tool-card-header">
+                            <span class="tool-card-title">Diagramme SIPOC - Processus de Production</span>
+                            <div class="tool-card-actions">
+                                <button class="icon-btn" title="Ajouter une ligne">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                    </svg>
+                                </button>
+                                <button class="icon-btn" title="Plein écran">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="sipoc-container">
+                            <table class="sipoc-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Suppliers
+                                            <span>Fournisseurs</span>
+                                        </th>
+                                        <th>
+                                            Inputs
+                                            <span>Entrées</span>
+                                        </th>
+                                        <th>
+                                            Process
+                                            <span>Processus</span>
+                                        </th>
+                                        <th>
+                                            Outputs
+                                            <span>Sorties</span>
+                                        </th>
+                                        <th>
+                                            Customers
+                                            <span>Clients</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="sipoc-cell-content">
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Fournisseur Acier ABC
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Stock interne composants
+                                                </div>
+                                                <button class="add-item-btn">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    </svg>
+                                                    Ajouter
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sipoc-cell-content">
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Tôles d'acier 2mm
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Composants électroniques
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Plan de fabrication
+                                                </div>
+                                                <button class="add-item-btn">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    </svg>
+                                                    Ajouter
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sipoc-cell-content">
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    1. Découpe laser
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    2. Pliage
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    3. Assemblage
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    4. Contrôle qualité
+                                                </div>
+                                                <button class="add-item-btn">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    </svg>
+                                                    Ajouter
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sipoc-cell-content">
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Produit fini assemblé
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Rapport de contrôle
+                                                </div>
+                                                <button class="add-item-btn">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    </svg>
+                                                    Ajouter
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="sipoc-cell-content">
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Service Expédition
+                                                </div>
+                                                <div class="sipoc-item">
+                                                    <span class="sipoc-item-icon"></span>
+                                                    Client final
+                                                </div>
+                                                <button class="add-item-btn">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="12" y1="5" x2="12" y2="19"/>
+                                                        <line x1="5" y1="12" x2="19" y2="12"/>
+                                                    </svg>
+                                                    Ajouter
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Panel -->
+                <aside class="help-panel">
+                    <div class="help-panel-header">
+                        <div class="help-panel-title">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                            Guide SIPOC
+                        </div>
+                        <button class="icon-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="help-panel-content">
+                        <div class="help-section">
+                            <h3 class="help-section-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4"/>
+                                    <path d="M12 8h.01"/>
+                                </svg>
+                                Qu'est-ce que le SIPOC ?
+                            </h3>
+                            <p class="help-text">
+                                Le SIPOC est un outil de cartographie de processus qui identifie les éléments clés : <strong>Suppliers</strong> (Fournisseurs), <strong>Inputs</strong> (Entrées), <strong>Process</strong> (Processus), <strong>Outputs</strong> (Sorties) et <strong>Customers</strong> (Clients).
+                            </p>
+                        </div>
+
+                        <div class="help-section">
+                            <h3 class="help-section-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                </svg>
+                                Comment remplir ?
+                            </h3>
+                            <p class="help-text">
+                                1. Commencez par le <strong>Process</strong> - listez les étapes principales<br><br>
+                                2. Identifiez les <strong>Outputs</strong> - que produit le processus ?<br><br>
+                                3. Définissez les <strong>Customers</strong> - qui reçoit les outputs ?<br><br>
+                                4. Listez les <strong>Inputs</strong> - de quoi avez-vous besoin ?<br><br>
+                                5. Identifiez les <strong>Suppliers</strong> - qui fournit les inputs ?
+                            </p>
+                        </div>
+
+                        <div class="help-tip">
+                            <svg class="help-tip-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                            <p class="help-tip-text">
+                                <strong>Conseil :</strong> Restez à un niveau macro (5-7 étapes max pour le processus). Le détail viendra dans les analyses suivantes.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <div class="connected-users">
+                        <div class="user-avatars">
+                            <div class="mini-avatar user-1">JD</div>
+                            <div class="mini-avatar user-2">ML</div>
+                            <div class="mini-avatar user-3">PT</div>
+                        </div>
+                        <span class="connected-label">3 utilisateurs connectés</span>
+                    </div>
+                    <div class="save-status">
+                        <span class="save-dot"></span>
+                        <span>Sauvegardé automatiquement</span>
+                    </div>
+                </div>
+                <div class="status-right">
+                    <button class="nav-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                        Charte de projet
+                    </button>
+                    <button class="nav-btn primary">
+                        CTQ
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle phase expansion
+        document.querySelectorAll('.phase-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const phaseItem = header.closest('.phase-item');
+                const wasExpanded = phaseItem.classList.contains('expanded');
+
+                // Close all phases
+                document.querySelectorAll('.phase-item').forEach(item => {
+                    item.classList.remove('expanded');
+                });
+
+                // Toggle clicked phase
+                if (!wasExpanded) {
+                    phaseItem.classList.add('expanded');
+                }
+            });
+        });
+
+        // Tool item click
+        document.querySelectorAll('.tool-item').forEach(tool => {
+            tool.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.tool-item').forEach(t => t.classList.remove('active'));
+                tool.classList.add('active');
+            });
+        });
+
+        // Add animation to save status
+        setInterval(() => {
+            const saveDot = document.querySelector('.save-dot');
+            saveDot.style.opacity = '0.3';
+            setTimeout(() => {
+                saveDot.style.opacity = '1';
+            }, 500);
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -34,6 +34,23 @@ interface GanttTemplateProps {
   readOnly?: boolean;
 }
 
+const getDefaultData = (): GanttData => {
+  const today = new Date().toISOString().split('T')[0];
+  const endDate = new Date();
+  endDate.setMonth(endDate.getMonth() + 3);
+
+  return {
+    projectName: '',
+    projectStart: today,
+    projectEnd: endDate.toISOString().split('T')[0],
+    tasks: [],
+    categories: ['Préparation', 'Développement', 'Test', 'Déploiement'],
+    viewMode: 'week',
+    showCompleted: true,
+    notes: '',
+  };
+};
+
 const GanttTemplate: React.FC<GanttTemplateProps> = ({
   data,
   onChange,
@@ -41,27 +58,14 @@ const GanttTemplate: React.FC<GanttTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<GanttData>(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const endDate = new Date();
-    endDate.setMonth(endDate.getMonth() + 3);
-
-    return data || {
-      projectName: '',
-      projectStart: today,
-      projectEnd: endDate.toISOString().split('T')[0],
-      tasks: [],
-      categories: ['Préparation', 'Développement', 'Test', 'Déploiement'],
-      viewMode: 'week',
-      showCompleted: true,
-      notes: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

@@ -1,6 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Plus, Trash2 } from 'lucide-react';
 import type { ToolDefinition } from '@/types';
+
+interface DefaultTemplateData {
+  notes: string;
+  items: string[];
+}
 
 interface DefaultTemplateProps {
   data: Record<string, any>;
@@ -15,31 +20,43 @@ export default function DefaultTemplate({
   toolDefinition,
   readOnly = false,
 }: DefaultTemplateProps) {
-  const [notes, setNotes] = useState<string>(data.notes || '');
-  const [items, setItems] = useState<string[]>(data.items || []);
+  const [templateData, setTemplateData] = useState<DefaultTemplateData>({
+    notes: data.notes || '',
+    items: data.items || [],
+  });
+
+  // Sync with parent data when it changes
+  useEffect(() => {
+    if (Object.keys(data).length > 0) {
+      setTemplateData({
+        notes: data.notes || '',
+        items: data.items || [],
+      });
+    }
+  }, [data]);
+
+  const updateData = (newData: DefaultTemplateData) => {
+    setTemplateData(newData);
+    onChange(newData);
+  };
 
   const handleNotesChange = (value: string) => {
-    setNotes(value);
-    onChange({ ...data, notes: value, items });
+    updateData({ ...templateData, notes: value });
   };
 
   const addItem = () => {
-    const newItems = [...items, ''];
-    setItems(newItems);
-    onChange({ ...data, notes, items: newItems });
+    updateData({ ...templateData, items: [...templateData.items, ''] });
   };
 
   const updateItem = (index: number, value: string) => {
-    const newItems = [...items];
+    const newItems = [...templateData.items];
     newItems[index] = value;
-    setItems(newItems);
-    onChange({ ...data, notes, items: newItems });
+    updateData({ ...templateData, items: newItems });
   };
 
   const removeItem = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-    onChange({ ...data, notes, items: newItems });
+    const newItems = templateData.items.filter((_, i) => i !== index);
+    updateData({ ...templateData, items: newItems });
   };
 
   return (
@@ -63,7 +80,7 @@ export default function DefaultTemplate({
             Notes et observations
           </label>
           <textarea
-            value={notes}
+            value={templateData.notes}
             onChange={(e) => handleNotesChange(e.target.value)}
             placeholder="Ajoutez vos notes ici..."
             className="input min-h-[150px] resize-none"
@@ -86,13 +103,13 @@ export default function DefaultTemplate({
             )}
           </div>
 
-          {items.length === 0 ? (
+          {templateData.items.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-4">
               Aucun élément. Cliquez sur "Ajouter" pour commencer.
             </p>
           ) : (
             <div className="space-y-2">
-              {items.map((item, index) => (
+              {templateData.items.map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <input
                     type="text"

@@ -40,6 +40,15 @@ interface TrainingTemplateProps {
   readOnly?: boolean;
 }
 
+const getDefaultData = (): TrainingData => ({
+  sessions: [],
+  globalObjective: '',
+  trainingPlan: '',
+  evaluationMethod: '',
+  followUpActions: '',
+  overallNotes: '',
+});
+
 const TrainingTemplate: React.FC<TrainingTemplateProps> = ({
   data,
   onChange,
@@ -47,14 +56,7 @@ const TrainingTemplate: React.FC<TrainingTemplateProps> = ({
   readOnly = false,
 }) => {
   const [localData, setLocalData] = useState<TrainingData>(() => {
-    return data || {
-      sessions: [],
-      globalObjective: '',
-      trainingPlan: '',
-      evaluationMethod: '',
-      followUpActions: '',
-      overallNotes: '',
-    };
+    return (data && Object.keys(data).length > 0) ? { ...getDefaultData(), ...data } : getDefaultData();
   });
 
   const [editingSession, setEditingSession] = useState<string | null>(null);
@@ -62,8 +64,8 @@ const TrainingTemplate: React.FC<TrainingTemplateProps> = ({
   const [newAttendeeName, setNewAttendeeName] = useState('');
 
   useEffect(() => {
-    if (data) {
-      setLocalData(data);
+    if (data && Object.keys(data).length > 0) {
+      setLocalData({ ...getDefaultData(), ...data });
     }
   }, [data]);
 

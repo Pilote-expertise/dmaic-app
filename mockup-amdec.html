@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMAIC Manager - AMDEC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --define-color: #2563eb;
+            --define-light: #dbeafe;
+            --measure-color: #16a34a;
+            --measure-light: #dcfce7;
+            --analyze-color: #ea580c;
+            --analyze-light: #ffedd5;
+            --improve-color: #9333ea;
+            --improve-light: #f3e8ff;
+            --control-color: #dc2626;
+            --control-light: #fee2e2;
+            --bg-dark: #0f172a;
+            --bg-sidebar: #1e293b;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #e2e8f0;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+            /* Criticality colors */
+            --critical-high: #dc2626;
+            --critical-high-bg: #fee2e2;
+            --critical-medium: #f59e0b;
+            --critical-medium-bg: #fef3c7;
+            --critical-low: #16a34a;
+            --critical-low-bg: #dcfce7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-dark);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 32px; }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--define-color), var(--control-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover { color: white; }
+
+        .header-right { display: flex; align-items: center; gap: 16px; }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-sidebar);
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--improve-color), var(--define-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-top: 64px;
+            padding: 32px;
+        }
+
+        /* Tool Header */
+        .tool-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .tool-title-section h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .phase-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: var(--analyze-light);
+            color: var(--analyze-color);
+        }
+
+        .tool-description {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--analyze-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-card-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .summary-card-value.high { color: var(--critical-high); }
+        .summary-card-value.medium { color: var(--critical-medium); }
+        .summary-card-value.low { color: var(--critical-low); }
+
+        /* AMDEC Table */
+        .amdec-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .amdec-toolbar {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: white;
+            border-color: var(--analyze-color);
+        }
+
+        .filter-btn.active {
+            background: var(--analyze-light);
+            border-color: var(--analyze-color);
+            color: var(--analyze-color);
+        }
+
+        .add-row-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--analyze-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .add-row-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .amdec-scroll {
+            overflow-x: auto;
+        }
+
+        .amdec-table {
+            width: 100%;
+            min-width: 1400px;
+            border-collapse: collapse;
+        }
+
+        .amdec-table th {
+            background: var(--bg-main);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+
+        .amdec-table th.section-header {
+            background: var(--analyze-light);
+            color: var(--analyze-color);
+            text-align: center;
+            border-left: 2px solid var(--analyze-color);
+        }
+
+        .amdec-table th.criticality-header {
+            background: #fef3c7;
+            color: #92400e;
+            text-align: center;
+        }
+
+        .amdec-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: top;
+        }
+
+        .amdec-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .amdec-table input[type="text"],
+        .amdec-table textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            background: transparent;
+            transition: all 0.2s;
+            resize: none;
+        }
+
+        .amdec-table input[type="text"]:hover,
+        .amdec-table textarea:hover {
+            background: white;
+            border-color: var(--border-color);
+        }
+
+        .amdec-table input[type="text"]:focus,
+        .amdec-table textarea:focus {
+            outline: none;
+            background: white;
+            border-color: var(--analyze-color);
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+        }
+
+        .rating-input {
+            width: 60px !important;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+        }
+
+        .rpn-cell {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .rpn-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 50px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .rpn-badge.high {
+            background: var(--critical-high-bg);
+            color: var(--critical-high);
+        }
+
+        .rpn-badge.medium {
+            background: var(--critical-medium-bg);
+            color: var(--critical-medium);
+        }
+
+        .rpn-badge.low {
+            background: var(--critical-low-bg);
+            color: var(--critical-low);
+        }
+
+        .action-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.pending { background: var(--critical-medium); }
+        .status-dot.in-progress { background: var(--define-color); }
+        .status-dot.completed { background: var(--critical-low); }
+
+        .row-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .row-action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .row-action-btn:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .row-action-btn.delete:hover {
+            background: var(--critical-high-bg);
+            color: var(--critical-high);
+        }
+
+        /* Legend */
+        .legend {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.high { background: var(--critical-high-bg); border: 2px solid var(--critical-high); }
+        .legend-color.medium { background: var(--critical-medium-bg); border: 2px solid var(--critical-medium); }
+        .legend-color.low { background: var(--critical-low-bg); border: 2px solid var(--critical-low); }
+
+        /* Help Panel Toggle */
+        .help-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--analyze-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+            transition: all 0.2s;
+        }
+
+        .help-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 1200px) {
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">6σ</div>
+                <span>DMAIC Manager</span>
+            </div>
+            <div class="breadcrumb">
+                <a href="#">Amélioration Ligne A3</a>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span>Analyze</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                <span style="color: white;">AMDEC</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+            </button>
+            <button class="header-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                </svg>
+            </button>
+            <div class="user-avatar">JD</div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="tool-header">
+            <div class="tool-title-section">
+                <h1>
+                    AMDEC Processus
+                    <span class="phase-tag">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                        Analyze
+                    </span>
+                </h1>
+                <p class="tool-description">Analyse des Modes de Défaillance, de leurs Effets et de leur Criticité</p>
+            </div>
+            <div class="tool-actions">
+                <button class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Exporter
+                </button>
+                <button class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                    </svg>
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-card-label">Modes de défaillance</div>
+                <div class="summary-card-value">12</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Criticité haute (RPN > 100)</div>
+                <div class="summary-card-value high">3</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Criticité moyenne (RPN 50-100)</div>
+                <div class="summary-card-value medium">5</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-card-label">Actions en cours</div>
+                <div class="summary-card-value low">8</div>
+            </div>
+        </div>
+
+        <!-- AMDEC Table -->
+        <div class="amdec-container">
+            <div class="amdec-toolbar">
+                <div class="toolbar-left">
+                    <button class="filter-btn active">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                        </svg>
+                        Tous
+                    </button>
+                    <button class="filter-btn">
+                        <span style="width: 8px; height: 8px; background: var(--critical-high); border-radius: 50%;"></span>
+                        Critiques
+                    </button>
+                    <button class="filter-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        En attente
+                    </button>
+                </div>
+                <button class="add-row-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Ajouter une ligne
+                </button>
+            </div>
+
+            <div class="amdec-scroll">
+                <table class="amdec-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th style="width: 140px;">Étape processus</th>
+                            <th style="width: 160px;">Mode de défaillance</th>
+                            <th style="width: 160px;">Effet</th>
+                            <th class="section-header">S</th>
+                            <th style="width: 140px;">Cause</th>
+                            <th class="section-header">O</th>
+                            <th style="width: 140px;">Contrôle actuel</th>
+                            <th class="section-header">D</th>
+                            <th class="criticality-header">RPN</th>
+                            <th style="width: 160px;">Action recommandée</th>
+                            <th style="width: 100px;">Responsable</th>
+                            <th style="width: 90px;">Statut</th>
+                            <th style="width: 60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: var(--text-secondary); font-weight: 500;">1</td>
+                            <td><input type="text" value="Découpe laser"></td>
+                            <td><input type="text" value="Bavures sur pièce"></td>
+                            <td><input type="text" value="Retouche nécessaire"></td>
+                            <td><input type="text" class="rating-input" value="7"></td>
+                            <td><input type="text" value="Paramètres laser incorrects"></td>
+                            <td><input type="text" class="rating-input" value="5"></td>
+                            <td><input type="text" value="Contrôle visuel 100%"></td>
+                            <td><input type="text" class="rating-input" value="4"></td>
+                            <td class="rpn-cell"><span class="rpn-badge high">140</span></td>
+                            <td><input type="text" value="Calibrer machine hebdo"></td>
+                            <td><input type="text" value="M. Dupont"></td>
+                            <td>
+                                <div class="action-status">
+                                    <span class="status-dot in-progress"></span>
+                                    En cours
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="row-action-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="row-action-btn delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-secondary); font-weight: 500;">2</td>
+                            <td><input type="text" value="Découpe laser"></td>
+                            <td><input type="text" value="Dimensions hors tolérance"></td>
+                            <td><input type="text" value="Pièce rebut"></td>
+                            <td><input type="text" class="rating-input" value="9"></td>
+                            <td><input type="text" value="Usure tête de coupe"></td>
+                            <td><input type="text" class="rating-input" value="3"></td>
+                            <td><input type="text" value="Mesure échantillon"></td>
+                            <td><input type="text" class="rating-input" value="5"></td>
+                            <td class="rpn-cell"><span class="rpn-badge high">135</span></td>
+                            <td><input type="text" value="Maintenance préventive"></td>
+                            <td><input type="text" value="Mme Martin"></td>
+                            <td>
+                                <div class="action-status">
+                                    <span class="status-dot pending"></span>
+                                    En attente
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="row-action-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="row-action-btn delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-secondary); font-weight: 500;">3</td>
+                            <td><input type="text" value="Pliage"></td>
+                            <td><input type="text" value="Angle incorrect"></td>
+                            <td><input type="text" value="Assemblage impossible"></td>
+                            <td><input type="text" class="rating-input" value="8"></td>
+                            <td><input type="text" value="Mauvais réglage presse"></td>
+                            <td><input type="text" class="rating-input" value="4"></td>
+                            <td><input type="text" value="Gabarit de contrôle"></td>
+                            <td><input type="text" class="rating-input" value="3"></td>
+                            <td class="rpn-cell"><span class="rpn-badge medium">96</span></td>
+                            <td><input type="text" value="Check-list démarrage"></td>
+                            <td><input type="text" value="M. Bernard"></td>
+                            <td>
+                                <div class="action-status">
+                                    <span class="status-dot completed"></span>
+                                    Terminé
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="row-action-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="row-action-btn delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-secondary); font-weight: 500;">4</td>
+                            <td><input type="text" value="Assemblage"></td>
+                            <td><input type="text" value="Vis mal serrée"></td>
+                            <td><input type="text" value="Démontage en service"></td>
+                            <td><input type="text" class="rating-input" value="6"></td>
+                            <td><input type="text" value="Couple non respecté"></td>
+                            <td><input type="text" class="rating-input" value="5"></td>
+                            <td><input type="text" value="Visseuse dynamométrique"></td>
+                            <td><input type="text" class="rating-input" value="2"></td>
+                            <td class="rpn-cell"><span class="rpn-badge low">60</span></td>
+                            <td><input type="text" value="Formation opérateurs"></td>
+                            <td><input type="text" value="Mme Leroux"></td>
+                            <td>
+                                <div class="action-status">
+                                    <span class="status-dot in-progress"></span>
+                                    En cours
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="row-action-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="row-action-btn delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--text-secondary); font-weight: 500;">5</td>
+                            <td><input type="text" value="Contrôle qualité"></td>
+                            <td><input type="text" value="Défaut non détecté"></td>
+                            <td><input type="text" value="Réclamation client"></td>
+                            <td><input type="text" class="rating-input" value="9"></td>
+                            <td><input type="text" value="Éclairage insuffisant"></td>
+                            <td><input type="text" class="rating-input" value="2"></td>
+                            <td><input type="text" value="Double contrôle"></td>
+                            <td><input type="text" class="rating-input" value="6"></td>
+                            <td class="rpn-cell"><span class="rpn-badge high">108</span></td>
+                            <td><input type="text" value="Améliorer poste contrôle"></td>
+                            <td><input type="text" value="M. Thomas"></td>
+                            <td>
+                                <div class="action-status">
+                                    <span class="status-dot pending"></span>
+                                    En attente
+                                </div>
+                            </td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="row-action-btn">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                        </svg>
+                                    </button>
+                                    <button class="row-action-btn delete">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="legend">
+                <span style="font-weight: 500;">Légende criticité (RPN) :</span>
+                <div class="legend-item">
+                    <div class="legend-color high"></div>
+                    <span>Haute (&gt; 100)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color medium"></div>
+                    <span>Moyenne (50-100)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color low"></div>
+                    <span>Basse (&lt; 50)</span>
+                </div>
+                <span style="margin-left: auto; font-size: 0.8rem;">S = Sévérité | O = Occurrence | D = Détection | RPN = S × O × D</span>
+            </div>
+        </div>
+    </main>
+
+    <button class="help-toggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+    </button>
+
+    <script>
+        // Auto-calculate RPN when S, O, D change
+        document.querySelectorAll('.rating-input').forEach(input => {
+            input.addEventListener('input', function() {
+                const row = this.closest('tr');
+                const ratings = row.querySelectorAll('.rating-input');
+                const s = parseInt(ratings[0].value) || 0;
+                const o = parseInt(ratings[1].value) || 0;
+                const d = parseInt(ratings[2].value) || 0;
+                const rpn = s * o * d;
+
+                const rpnBadge = row.querySelector('.rpn-badge');
+                rpnBadge.textContent = rpn;
+
+                // Update color class
+                rpnBadge.classList.remove('high', 'medium', 'low');
+                if (rpn > 100) {
+                    rpnBadge.classList.add('high');
+                } else if (rpn >= 50) {
+                    rpnBadge.classList.add('medium');
+                } else {
+                    rpnBadge.classList.add('low');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
