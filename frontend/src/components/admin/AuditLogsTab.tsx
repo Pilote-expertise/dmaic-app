@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FileText, ChevronLeft, ChevronRight, Filter, Search, Calendar, RefreshCw } from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight, Filter, Calendar, RefreshCw } from 'lucide-react';
 import { adminApi } from '@/services/api';
 import type { AuditLog } from '@/types';
 import toast from 'react-hot-toast';
 
-interface AuditLogWithRelations extends AuditLog {
+interface AuditLogWithRelations extends Omit<AuditLog, 'project'> {
   user: {
     id: string;
     firstName: string;
@@ -294,7 +294,7 @@ export default function AuditLogsTab() {
                           <summary className="text-define hover:text-define/80">
                             Voir les changements
                           </summary>
-                          {formatChanges(log.changes)}
+                          {formatChanges(log.changes as string | null)}
                         </details>
                       )}
                     </td>

@@ -88,7 +88,7 @@ const createEmptyMeasurement = (subgroup: number, subgroupSize: number): Measure
 });
 
 // Calculate statistics
-const calculateStats = (measurements: Measurement[], chartType: string, subgroupSize: number) => {
+const calculateStats = (measurements: Measurement[], _chartType: string, subgroupSize: number) => {
   if (measurements.length < 2) return null;
 
   const allValues = measurements.flatMap(m => m.values.filter(v => v !== null && v !== undefined));

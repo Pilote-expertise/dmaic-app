@@ -275,7 +275,7 @@ export default function CapabilityTemplate({
     });
   };
 
-  const rating = stats?.cpk !== null ? getCapabilityRating(stats.cpk) : null;
+  const rating = stats && stats.cpk !== null ? getCapabilityRating(stats.cpk) : null;
   const RatingIcon = rating?.icon || AlertTriangle;
 
   return (

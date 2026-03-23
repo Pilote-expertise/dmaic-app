@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Clock, UserCheck, UserX, RefreshCw, Search } from 'lucide-react';
+import { Check, X, Clock, UserCheck, UserX, RefreshCw } from 'lucide-react';
 import { adminApi } from '@/services/api';
 import type { AccessRequest } from '@/types';
 import toast from 'react-hot-toast';

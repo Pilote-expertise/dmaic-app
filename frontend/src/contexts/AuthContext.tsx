@@ -63,12 +63,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: RegisterData) => {
     try {
-      const { user, token } = await authApi.register(data);
-      localStorage.setItem('dmaic_token', token);
-      localStorage.setItem('dmaic_user', JSON.stringify(user));
-      setUser(user);
-      toast.success('Compte créé avec succès !');
-      navigate('/');
+      const response = await authApi.register(data);
+      // Registration returns a message and requestId for pending approval
+      if ('message' in response && 'requestId' in response) {
+        toast.success(response.message);
+        navigate('/login');
+      } else {
+        // Fallback for direct registration (if enabled)
+        const { user: registeredUser, token } = response as { user: User; token: string };
+        localStorage.setItem('dmaic_token', token);
+        localStorage.setItem('dmaic_user', JSON.stringify(registeredUser));
+        setUser(registeredUser);
+        toast.success('Compte créé avec succès !');
+        navigate('/');
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Erreur lors de l\'inscription';
       toast.error(message);

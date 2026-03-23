@@ -114,7 +114,7 @@ const normalCDF = (x: number): number => {
 };
 
 // Approximate p-value from t-statistic
-const tDistPValue = (t: number, df: number, twoTailed: boolean): number => {
+const tDistPValue = (t: number, _df: number, twoTailed: boolean): number => {
   // Approximation using normal distribution
   const pOneTailed = 1 - normalCDF(Math.abs(t));
   return twoTailed ? 2 * pOneTailed : pOneTailed;
