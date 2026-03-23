@@ -95,9 +95,18 @@ export default function AuditLogsTab() {
     return labels[type] || type;
   };
 
-  const formatChanges = (changes: string | null) => {
+  const formatChanges = (changes: string | Record<string, unknown> | null | undefined) => {
     if (!changes) return null;
     try {
+      // If it's already an object, stringify it directly
+      if (typeof changes === 'object') {
+        return (
+          <pre className="text-xs bg-gray-50 p-2 rounded mt-2 overflow-x-auto max-w-md">
+            {JSON.stringify(changes, null, 2)}
+          </pre>
+        );
+      }
+      // If it's a string, parse it first
       const parsed = JSON.parse(changes);
       return (
         <pre className="text-xs bg-gray-50 p-2 rounded mt-2 overflow-x-auto max-w-md">
@@ -105,7 +114,7 @@ export default function AuditLogsTab() {
         </pre>
       );
     } catch {
-      return <span className="text-xs text-gray-500">{changes}</span>;
+      return <span className="text-xs text-gray-500">{String(changes)}</span>;
     }
   };
 
@@ -294,7 +303,7 @@ export default function AuditLogsTab() {
                           <summary className="text-define hover:text-define/80">
                             Voir les changements
                           </summary>
-                          {formatChanges(log.changes as string | null)}
+                          {formatChanges(log.changes)}
                         </details>
                       )}
                     </td>
